@@ -1,0 +1,10 @@
+.link_grow{
+    flex-grow: 1;
+}
+.card_login a:nth-child(1){
+    margin-right: 10px;
+}
+
+.card_login a{
+    text-decoration: none;
+}
