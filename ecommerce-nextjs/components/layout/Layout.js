@@ -8,10 +8,14 @@ import {
   createTheme,
   ThemeProvider,
   CssBaseline,
+  Switch,
 } from '@mui/material';
 import { styled } from '@mui/system';
 import NextLink from 'next/link';
 import styles from './layout.module.css';
+import { useContext } from 'react';
+import { Store } from '../../utils/Store';
+import Cookies from 'js-cookie';
 
 const MyAppBar = styled(AppBar)`
   background-color: #203040;
@@ -36,6 +40,13 @@ const MyFooter = styled('footer')`
 `;
 
 const Layout = ({ title, description, children }) => {
+  const { state, dispatch } = useContext(Store);
+  const { darkMode } = state;
+  const darkModeChangeHandler = () => {
+    dispatch({ type: darkMode ? 'DARK_MODE_OFF' : 'DARK_MODE_ON' });
+    const newMode = !darkMode;
+    Cookies.set('darkMode', newMode ? 'ON' : 'OFF');
+  };
   const theme = createTheme({
     typography: {
       h1: {
@@ -50,7 +61,7 @@ const Layout = ({ title, description, children }) => {
       },
     },
     palette: {
-      type: 'light',
+      mode: darkMode ? 'dark' : 'light',
       primary: {
         main: '#f0c000',
       },
@@ -59,6 +70,7 @@ const Layout = ({ title, description, children }) => {
       },
     },
   });
+
   return (
     <div>
       <Head>
@@ -76,6 +88,10 @@ const Layout = ({ title, description, children }) => {
             </NextLink>
             <div className={styles.link_grow}></div>
             <div className={styles.card_login}>
+              <Switch
+                checked={darkMode}
+                onChange={() => darkModeChangeHandler()}
+              ></Switch>
               <NextLink href="/card" passHref>
                 <Link>Cart</Link>
               </NextLink>
