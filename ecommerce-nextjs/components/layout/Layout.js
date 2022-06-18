@@ -83,7 +83,7 @@ const Layout = ({ title, description, children }) => {
           <Toolbar>
             <NextLink href="/" passHref>
               <Link>
-                <Typography>amazona</Typography>
+                <Typography>Shoes Shopping</Typography>
               </Link>
             </NextLink>
             <div className={styles.link_grow}></div>
