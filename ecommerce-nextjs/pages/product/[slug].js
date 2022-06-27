@@ -1,6 +1,4 @@
-import { useRouter } from 'next/router';
 import Layout from '../../components/layout/Layout';
-import data from '../../utils/data';
 import NextLink from 'next/link';
 import {
   Button,
@@ -13,11 +11,11 @@ import {
 } from '@mui/material';
 import styles from './product.module.css';
 import Image from 'next/image';
+import db from '../../utils/db';
+import Product from '../../models/Product';
 
-const ProductScreen = ({}) => {
-  const router = useRouter();
-  const { slug } = router.query;
-  const product = data.products.find((item) => item.slug === slug);
+const ProductScreen = (props) => {
+  const { product } = props;
   if (!product) {
     return <div>Product Not Found</div>;
   }
@@ -102,3 +100,16 @@ const ProductScreen = ({}) => {
 };
 
 export default ProductScreen;
+
+export async function getServerSideProps(context) {
+  const { params } = context;
+  const { slug } = params;
+  await db.connect();
+  const product = await Product.findOne({ slug }).lean();
+  await db.disconnect();
+  return {
+    props: {
+      product: db.convertDocToObj(product),
+    },
+  };
+}
