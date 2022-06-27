@@ -13,12 +13,25 @@ import styles from './product.module.css';
 import Image from 'next/image';
 import db from '../../utils/db';
 import Product from '../../models/Product';
+import axios from 'axios';
+import { useContext } from 'react';
+import { Store } from '../../utils/Store';
 
 const ProductScreen = (props) => {
+  const { dispatch } = useContext(Store);
   const { product } = props;
   if (!product) {
     return <div>Product Not Found</div>;
   }
+
+  const addToCartHandler = async () => {
+    const { data } = await axios.get(`/api/products/${product._id}`);
+    if (data.countInStock <= 0) {
+      window.alert('Sorry. Product is out of stock');
+      return;
+    }
+    dispatch({ type: 'CART_ADD_ITEM', payload: { ...product, quantity: 1 } });
+  };
   return (
     <Layout title={product.name} description={product.description}>
       <div className={styles.section}>
@@ -87,7 +100,12 @@ const ProductScreen = (props) => {
                 </Grid>
               </ListItem>
               <ListItem>
-                <Button fullWidth variant="contained" color="primary">
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={addToCartHandler}
+                >
                   ADD TO CART
                 </Button>
               </ListItem>
