@@ -23,16 +23,30 @@ import NextLink from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useEffect } from 'react';
+import axios from 'axios';
 
 const CartScreen = ({}) => {
   const [isSSR, setIsSSR] = useState(true);
-  const { state } = useContext(Store);
+  const { state, dispatch } = useContext(Store);
   const {
     cart: { cartItems },
   } = state;
   useEffect(() => {
     setIsSSR(false);
   }, []);
+
+  const updateCartHandler = async (product, quantity) => {
+    const { data } = await axios.get(`/api/products/${product._id}`);
+    if (data.countInStock < quantity) {
+      window.alert('Sorry. Product is out of stock');
+      return;
+    }
+    dispatch({ type: 'CART_ADD_ITEM', payload: { ...product, quantity } });
+  };
+
+  const removeItemHandler = (product) => {
+    dispatch({ type: 'REMOVE_ITEM_CART', payload: product });
+  };
   return (
     !isSSR && (
       <Layout title="Shopping Cart">
@@ -41,7 +55,10 @@ const CartScreen = ({}) => {
         </Typography>
         {cartItems.length === 0 ? (
           <div>
-            Cart Is Empty<NextLink href="/">Go To Home</NextLink>
+            Cart Is Empty
+            <NextLink href="/" passHref>
+              <Link> Go To Home</Link>
+            </NextLink>
           </div>
         ) : (
           <Grid container spacing={1}>
@@ -82,7 +99,12 @@ const CartScreen = ({}) => {
                         </TableCell>
 
                         <TableCell align="right">
-                          <Select value={item.quantity}>
+                          <Select
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateCartHandler(item, e.target.value)
+                            }
+                          >
                             {[...Array(item.countInStock).keys()].map((x) => (
                               <MenuItem key={x + 1} value={x + 1}>
                                 {x + 1}
@@ -94,7 +116,11 @@ const CartScreen = ({}) => {
                         <TableCell align="right">${item.price}</TableCell>
 
                         <TableCell align="right">
-                          <Button color="secondary" variant="contained">
+                          <Button
+                            color="secondary"
+                            variant="contained"
+                            onClick={() => removeItemHandler(item)}
+                          >
                             x
                           </Button>
                         </TableCell>
