@@ -13,7 +13,7 @@ import axios from 'axios';
 import NextLink from 'next/link';
 import db from '../utils/db';
 import Product from '../models/Product';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Store } from '../utils/Store';
 import { useRouter } from 'next/router';
 
@@ -35,45 +35,51 @@ export default function Home(props) {
     dispatch({ type: 'CART_ADD_ITEM', payload: { ...product, quantity } });
     router.push('/cart');
   };
+  const [isSSR, setIsSSR] = useState(true);
+  useEffect(() => {
+    setIsSSR(false);
+  }, []);
   return (
-    <Layout>
-      <div>
-        <h1>Products</h1>
-        <Grid container spacing={3}>
-          {products.map((item) => (
-            <Grid item md={4} key={item.name}>
-              <Card>
-                <NextLink href={`/product/${item.slug}`} passHref>
-                  <CardActionArea>
-                    <CardMedia
-                      component="img"
-                      image={item.image}
-                      title={item.name}
-                      width="368"
-                      height="243"
-                      style={{ objectFit: 'contain' }}
-                    ></CardMedia>
-                    <CardContent>
-                      <Typography>{item.name}</Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </NextLink>
-                <CardActions>
-                  <Typography>${item.price}</Typography>
-                  <Button
-                    size="small"
-                    color="primary"
-                    onClick={() => addToCartHandler(item)}
-                  >
-                    Add To Cart
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </div>
-    </Layout>
+    !isSSR && (
+      <Layout>
+        <div>
+          <h1>Products</h1>
+          <Grid container spacing={3}>
+            {products.map((item) => (
+              <Grid item md={4} key={item.name}>
+                <Card>
+                  <NextLink href={`/product/${item.slug}`} passHref>
+                    <CardActionArea>
+                      <CardMedia
+                        component="img"
+                        image={item.image}
+                        title={item.name}
+                        width="368"
+                        height="243"
+                        style={{ objectFit: 'contain' }}
+                      ></CardMedia>
+                      <CardContent>
+                        <Typography>{item.name}</Typography>
+                      </CardContent>
+                    </CardActionArea>
+                  </NextLink>
+                  <CardActions>
+                    <Typography>${item.price}</Typography>
+                    <Button
+                      size="small"
+                      color="primary"
+                      onClick={() => addToCartHandler(item)}
+                    >
+                      Add To Cart
+                    </Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </div>
+      </Layout>
+    )
   );
 }
 

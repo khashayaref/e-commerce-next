@@ -15,7 +15,6 @@ import {
   List,
   ListItem,
 } from '@mui/material';
-import dynamic from 'next/dynamic';
 import { useContext } from 'react';
 import Layout from '../components/layout/Layout';
 import { Store } from '../utils/Store';
