@@ -24,8 +24,10 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/router';
 
 const CartScreen = ({}) => {
+  const router = useRouter();
   const [isSSR, setIsSSR] = useState(true);
   const { state, dispatch } = useContext(Store);
   const {
@@ -46,6 +48,10 @@ const CartScreen = ({}) => {
 
   const removeItemHandler = (product) => {
     dispatch({ type: 'REMOVE_ITEM_CART', payload: product });
+  };
+
+  const checkoutHandler = () => {
+    router.push('/shipping');
   };
   return (
     !isSSR && (
@@ -148,7 +154,12 @@ const CartScreen = ({}) => {
                     </Typography>
                   </ListItem>
                   <ListItem>
-                    <Button color="primary" variant="contained" fullWidth>
+                    <Button
+                      onClick={checkoutHandler}
+                      color="primary"
+                      variant="contained"
+                      fullWidth
+                    >
                       Check Out
                     </Button>
                   </ListItem>
