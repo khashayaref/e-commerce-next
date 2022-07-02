@@ -30,7 +30,7 @@ const Login = ({}) => {
           <ListItem>
             <TextField
               variant="outlined"
-              id="email"
+              id="password"
               fullWidth
               label="Password"
               type="password"

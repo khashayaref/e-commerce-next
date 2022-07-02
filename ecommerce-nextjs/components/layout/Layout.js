@@ -14,7 +14,7 @@ import {
 import { styled } from '@mui/system';
 import NextLink from 'next/link';
 import styles from './layout.module.css';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Store } from '../../utils/Store';
 import Cookies from 'js-cookie';
 
@@ -72,53 +72,61 @@ const Layout = ({ title, description, children }) => {
     },
   });
 
+  const [isSSR, setIsSSR] = useState(true);
+  useEffect(() => {
+    setIsSSR(false);
+  }, []);
   return (
-    <div>
-      <Head>
-        <title>{title ? `${title} - Next Amazon` : 'Next Amazon'}</title>
-        {description && <meta name="description" content={description}></meta>}
-      </Head>
-      <ThemeProvider theme={theme}>
-        <CssBaseline></CssBaseline>
-        <MyAppBar position="static">
-          <Toolbar>
-            <NextLink href="/" passHref>
-              <Link>
-                <Typography>Shoes Shopping</Typography>
-              </Link>
-            </NextLink>
-            <div className={styles.link_grow}></div>
-            <div className={styles.card_login}>
-              <Switch
-                checked={darkMode}
-                onChange={() => darkModeChangeHandler()}
-              ></Switch>
-              <NextLink href="/card" passHref>
+    !isSSR && (
+      <div>
+        <Head>
+          <title>{title ? `${title} - Next Amazon` : 'Next Amazon'}</title>
+          {description && (
+            <meta name="description" content={description}></meta>
+          )}
+        </Head>
+        <ThemeProvider theme={theme}>
+          <CssBaseline></CssBaseline>
+          <MyAppBar position="static">
+            <Toolbar>
+              <NextLink href="/" passHref>
                 <Link>
-                  {cart.cartItems.length > 0 ? (
-                    <Badge
-                      color="secondary"
-                      badgeContent={cart.cartItems.length}
-                    >
-                      Cart
-                    </Badge>
-                  ) : (
-                    'Cart'
-                  )}
+                  <Typography>Shoes Shopping</Typography>
                 </Link>
               </NextLink>
-              <NextLink href="/login" passHref>
-                <Link>Login</Link>
-              </NextLink>
-            </div>
-          </Toolbar>
-        </MyAppBar>
-        <MyContainer>{children}</MyContainer>
-        <MyFooter>
-          <Typography>All Rights Reserved Next Shopping WebSite</Typography>
-        </MyFooter>
-      </ThemeProvider>
-    </div>
+              <div className={styles.link_grow}></div>
+              <div className={styles.card_login}>
+                <Switch
+                  checked={darkMode}
+                  onChange={() => darkModeChangeHandler()}
+                ></Switch>
+                <NextLink href="/card" passHref>
+                  <Link>
+                    {cart.cartItems.length > 0 ? (
+                      <Badge
+                        color="secondary"
+                        badgeContent={cart.cartItems.length}
+                      >
+                        Cart
+                      </Badge>
+                    ) : (
+                      'Cart'
+                    )}
+                  </Link>
+                </NextLink>
+                <NextLink href="/login" passHref>
+                  <Link>Login</Link>
+                </NextLink>
+              </div>
+            </Toolbar>
+          </MyAppBar>
+          <MyContainer>{children}</MyContainer>
+          <MyFooter>
+            <Typography>All Rights Reserved Next Shopping WebSite</Typography>
+          </MyFooter>
+        </ThemeProvider>
+      </div>
+    )
   );
 };
 
