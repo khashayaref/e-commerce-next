@@ -10,6 +10,9 @@ import {
   CssBaseline,
   Switch,
   Badge,
+  Button,
+  MenuList,
+  MenuItem,
 } from '@mui/material';
 import { styled } from '@mui/system';
 import NextLink from 'next/link';
@@ -17,6 +20,7 @@ import styles from './layout.module.css';
 import { useContext, useEffect, useState } from 'react';
 import { Store } from '../../utils/Store';
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/router';
 
 const MyAppBar = styled(AppBar)`
   background-color: #203040;
@@ -41,8 +45,9 @@ const MyFooter = styled('footer')`
 `;
 
 const Layout = ({ title, description, children }) => {
+  const router = useRouter();
   const { state, dispatch } = useContext(Store);
-  const { darkMode, cart } = state;
+  const { darkMode, cart, userInfo } = state;
   const darkModeChangeHandler = () => {
     dispatch({ type: darkMode ? 'DARK_MODE_OFF' : 'DARK_MODE_ON' });
     const newMode = !darkMode;
@@ -76,6 +81,16 @@ const Layout = ({ title, description, children }) => {
   useEffect(() => {
     setIsSSR(false);
   }, []);
+
+  const [open, setOpen] = useState(false);
+
+  const logoutHandler = () => {
+    setOpen(false);
+    dispatch({ type: 'USER_LOGOUT' });
+    Cookies.remove('userInfo');
+    Cookies.remove('cartItems');
+    router.push('/');
+  };
   return (
     !isSSR && (
       <div>
@@ -114,9 +129,33 @@ const Layout = ({ title, description, children }) => {
                     )}
                   </Link>
                 </NextLink>
-                <NextLink href="/login" passHref>
-                  <Link>Login</Link>
-                </NextLink>
+                {userInfo ? (
+                  <>
+                    <Button
+                      className={styles.navbar_button}
+                      onClick={() => setOpen(!open)}
+                    >
+                      {userInfo.name}
+                    </Button>
+                    {open && (
+                      <div className={styles.menu_navbar}>
+                        <ul>
+                          <li>
+                            <NextLink href="#">Profile</NextLink>
+                          </li>
+                          <li>
+                            <NextLink href="#">My account</NextLink>
+                          </li>
+                          <li onClick={logoutHandler}>Logout</li>
+                        </ul>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <NextLink href="/login" passHref>
+                    <Link>Login</Link>
+                  </NextLink>
+                )}
               </div>
             </Toolbar>
           </MyAppBar>

@@ -8,3 +8,29 @@
 .card_login a{
     text-decoration: none;
 }
+.navbar_button {
+    color: white;
+}
+.menu_navbar{
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    width: 120px;
+    height: 100px;
+    background-color: white;
+    border-radius: 2px;
+    border: none;margin: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.menu_navbar ul{
+    list-style: none;
+    padding: 0;
+    padding-left: 10px;
+}
+.menu_navbar ul li:hover{
+    cursor: pointer;
+    background-color: lightgray;
+}
+.menu_navbar ul li a{
+    color: black;
+}
