@@ -11,8 +11,6 @@ import {
   Switch,
   Badge,
   Button,
-  MenuList,
-  MenuItem,
 } from '@mui/material';
 import { styled } from '@mui/system';
 import NextLink from 'next/link';
