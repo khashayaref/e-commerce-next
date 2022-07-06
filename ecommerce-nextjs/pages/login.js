@@ -10,7 +10,6 @@ import Layout from '../components/layout/Layout';
 import classes from './login.module.css';
 import NextLink from 'next/link';
 import axios from 'axios';
-import { useState } from 'react';
 import { useContext } from 'react';
 import { Store } from '../utils/Store';
 import { useRouter } from 'next/router';
@@ -19,7 +18,7 @@ import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 
-const Login = ({}) => {
+const Login = () => {
   const {
     handleSubmit,
     control,
