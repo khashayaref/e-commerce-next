@@ -18,7 +18,7 @@ import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 
-const Register = ({}) => {
+const Register = () => {
   const {
     handleSubmit,
     control,
