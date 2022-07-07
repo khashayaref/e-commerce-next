@@ -7,7 +7,7 @@ import Layout from '../components/layout/Layout';
 import classes from './login.module.css';
 import Cookies from 'js-cookie';
 import { Controller, useForm } from 'react-hook-form';
-import CheckoutWizard from '../components/checkoutWizard/checkoutWizard';
+import CheckoutWizard from '../components/checkoutWizard/CheckoutWizard';
 
 const Shipping = () => {
   const {
