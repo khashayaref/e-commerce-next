@@ -1,4 +1,3 @@
-import styles from './payment.module.css';
 import {
   Button,
   FormControl,
@@ -30,7 +29,7 @@ const Payment = () => {
     if (!shippingAddress.address) {
       router.push('/shipping');
     } else {
-      setPaymentMethod(JSON.parse(Cookies.get('paymentMethod')) || '');
+      setPaymentMethod(Cookies.get('paymentMethod') || '');
     }
   }, []);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -42,14 +41,14 @@ const Payment = () => {
     } else {
       dispatch({ type: 'SAVE_PAYMENT_METHOD', payload: paymentMethod });
       Cookies.set('paymentMethod', JSON.stringify(paymentMethod));
-      router.push('/placeorder');
+      router.push('/placeOrder');
       console.log(Cookies.get('paymentMethod'));
     }
   };
   return (
     <Layout title="Payment Mehtod">
       <CheckoutWizard activeStep={2}></CheckoutWizard>
-      <form onSubmit={onSubmitHandler} className={styles.form}>
+      <form onSubmit={onSubmitHandler}>
         <Typography component="h1" variant="h1">
           Payment Method
         </Typography>
