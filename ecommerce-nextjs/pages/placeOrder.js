@@ -12,6 +12,7 @@ import {
   Card,
   List,
   ListItem,
+  CircularProgress,
 } from '@mui/material';
 import { useContext } from 'react';
 import Layout from '../components/layout/Layout';
@@ -23,14 +24,19 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import styles from './placeOrder.module.css';
 import CheckoutWizard from '../components/checkoutWizard/CheckoutWizard';
+import { useSnackbar } from 'notistack';
+import { getError } from '../utils/error';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const PlaceOrder = () => {
   const router = useRouter();
   const [isSSR, setIsSSR] = useState(true);
-  const { state } = useContext(Store);
+  const { state, dispatch } = useContext(Store);
   const {
     cart: { cartItems, shippingAddress },
     paymentMethod,
+    userInfo,
   } = state;
   useEffect(() => {
     setIsSSR(false);
@@ -49,7 +55,43 @@ const PlaceOrder = () => {
     if (!paymentMethod) {
       router.push('/payment');
     }
+    if (cartItems.length === 0) {
+      router.push('/cart');
+    }
   }, []);
+
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const [loading, setLoading] = useState(false);
+  const placeOrderHandler = async () => {
+    closeSnackbar();
+    try {
+      setLoading(true);
+      const { data } = await axios.post(
+        '/api/orders',
+        {
+          orderItems: cartItems,
+          paymentMethod,
+          shippingAddress,
+          itemsPrice,
+          shippingPrice,
+          taxPrice,
+          totalPrice,
+        },
+        {
+          headers: {
+            authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
+      dispatch({ type: 'CART_CLEAR' });
+      Cookies.remove('cartItems');
+      setLoading(false);
+      router.push(`/order/${data._id}`);
+    } catch (err) {
+      setLoading(false);
+      enqueueSnackbar(getError(err), { variant: 'error' });
+    }
+  };
   return (
     !isSSR && (
       <Layout title="Shopping Cart">
@@ -191,10 +233,20 @@ const PlaceOrder = () => {
                   </Grid>
                 </ListItem>
                 <ListItem>
-                  <Button color="primary" variant="contained" fullWidth>
+                  <Button
+                    onClick={placeOrderHandler}
+                    color="primary"
+                    variant="contained"
+                    fullWidth
+                  >
                     Place Order
                   </Button>
                 </ListItem>
+                {loading && (
+                  <ListItem>
+                    <CircularProgress />
+                  </ListItem>
+                )}
               </List>
             </Card>
           </Grid>
