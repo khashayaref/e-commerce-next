@@ -62,8 +62,11 @@ function reducer(state, action) {
       return {
         ...state,
         userInfo: null,
-        cart: { cartItems: [] },
+        cart: { cartItems: [], shippingAddress: {} },
+        paymentMethod: '',
       };
+    case 'CART_CLEAR':
+      return { ...state, cart: { ...state.cart, cartItems: [] } };
     default:
       return state;
   }
