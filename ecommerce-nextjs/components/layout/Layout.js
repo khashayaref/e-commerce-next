@@ -87,6 +87,7 @@ const Layout = ({ title, description, children }) => {
     dispatch({ type: 'USER_LOGOUT' });
     Cookies.remove('userInfo');
     Cookies.remove('cartItems');
+    Cookies.remove('paymentMethod');
     router.push('/');
   };
   return (

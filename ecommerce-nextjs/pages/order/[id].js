@@ -8,98 +8,104 @@ import {
   TableCell,
   TableBody,
   Link,
-  Button,
   Card,
   List,
   ListItem,
   CircularProgress,
 } from '@mui/material';
 import { useContext } from 'react';
-import Layout from '../components/layout/Layout';
-import { Store } from '../utils/Store';
+import Layout from '../../components/layout/Layout';
+import { Store } from '../../utils/Store';
 import NextLink from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import styles from './placeOrder.module.css';
-import CheckoutWizard from '../components/checkoutWizard/CheckoutWizard';
+import styles from './order.module.css';
+import CheckoutWizard from '../../components/checkoutWizard/CheckoutWizard';
 import { useSnackbar } from 'notistack';
-import { getError } from '../utils/error';
+import { getError } from '../../utils/error';
 import axios from 'axios';
-import Cookies from 'js-cookie';
+import { useReducer } from 'react';
 
-const PlaceOrder = () => {
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'FETCH_REQUEST':
+      return { ...state, loading: true, error: '' };
+    case 'FETCH_SUCCESS':
+      return { ...state, loading: false, order: action.payload, error: '' };
+    case 'FETCH_FAIL':
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+const Order = ({ params }) => {
+  const orderId = params.id;
   const router = useRouter();
   const [isSSR, setIsSSR] = useState(true);
-  const { state, dispatch } = useContext(Store);
+  const { state } = useContext(Store);
+  const { userInfo } = state;
+  // useEffect(() => {
+  //   setIsSSR(false);
+  // }, []);
+
+  const [{ loading, error, order }, dispatch] = useReducer(reducer, {
+    loading: true,
+    error: '',
+    order: {},
+  });
+
   const {
-    cart: { cartItems, shippingAddress },
+    shippingAddress,
+    totalPrice,
+    taxPrice,
     paymentMethod,
-    userInfo,
-  } = state;
-  useEffect(() => {
-    setIsSSR(false);
-  }, []);
-
-  const roundDecimalNumber = (num) =>
-    Math.round((num * 100 + Number.EPSILON) / 100);
-  const itemsPrice = roundDecimalNumber(
-    cartItems.reduce((p, c) => p + c.price * c.quantity, 0)
-  );
-  const shippingPrice = itemsPrice > 200 ? 0 : 15;
-  const taxPrice = roundDecimalNumber(itemsPrice * 0.15);
-  const totalPrice = roundDecimalNumber(itemsPrice + shippingPrice + taxPrice);
+    orderItems,
+    itemsPrice,
+    shippingPrice,
+    isDeliverde,
+    isPaid,
+    paidAt,
+    deliveredAt,
+  } = order;
 
   useEffect(() => {
-    if (!paymentMethod) {
-      router.push('/payment');
+    if (!userInfo) {
+      router.push('/login');
     }
-    if (cartItems.length === 0) {
-      router.push('/cart');
+    const fetchOrder = async () => {
+      try {
+        dispatch({ type: 'FETCH_REQUEST' });
+        const { data } = await axios.get(`/api/orders/${orderId}`, {
+          headers: { authorization: `Bearer ${userInfo.token}` },
+        });
+        console.log(data);
+        dispatch({ type: 'FETCH_SUCCESS', payload: data });
+      } catch (err) {
+        dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
+      }
+    };
+    if (!order._id || (order._id && order._id !== orderId)) {
+      fetchOrder();
     }
-  }, []);
+  }, [order]);
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const [loading, setLoading] = useState(false);
-  const placeOrderHandler = async () => {
-    closeSnackbar();
-    try {
-      setLoading(true);
-      const { data } = await axios.post(
-        '/api/orders',
-        {
-          orderItems: cartItems,
-          paymentMethod,
-          shippingAddress,
-          itemsPrice,
-          shippingPrice,
-          taxPrice,
-          totalPrice,
-        },
-        {
-          headers: {
-            authorization: `Bearer ${userInfo.token}`,
-          },
-        }
-      );
-      dispatch({ type: 'CART_CLEAR' });
-      Cookies.remove('cartItems');
-      setLoading(false);
-      router.push(`/order/${data._id}`);
-    } catch (err) {
-      setLoading(false);
-      enqueueSnackbar(getError(err), { variant: 'error' });
-    }
-  };
-  return (
-    !isSSR && (
-      <Layout title="Place Order">
-        <CheckoutWizard activeStep={3}></CheckoutWizard>
-        <Typography component="h1" variant="h1">
-          Place Order
-        </Typography>
 
+  return (
+    // !isSSR && (
+    <Layout title={`Order ${orderId}`}>
+      <CheckoutWizard activeStep={3}></CheckoutWizard>
+      <Typography component="h1" variant="h1">
+        Order {orderId}
+      </Typography>
+      {loading ? (
+        <CircularProgress />
+      ) : error ? (
+        <Typography className={styles.error}>{error}</Typography>
+      ) : (
         <Grid container spacing={1}>
           <Grid item md={9} xs={12}>
             <Card className={styles.section}>
@@ -114,6 +120,12 @@ const PlaceOrder = () => {
                   {shippingAddress.city}, {shippingAddress.postalCode},{' '}
                   {shippingAddress.country}
                 </ListItem>
+                <ListItem>
+                  Delivered:{' '}
+                  {isDeliverde
+                    ? `delivered at ${deliveredAt}`
+                    : 'not delivered'}
+                </ListItem>
               </List>
             </Card>
             <Card className={styles.section}>
@@ -124,6 +136,9 @@ const PlaceOrder = () => {
                   </Typography>
                 </ListItem>
                 <ListItem>{paymentMethod}</ListItem>
+                <ListItem>
+                  Paid: {isPaid ? `paid at ${paidAt}` : 'not paid'}
+                </ListItem>
               </List>
             </Card>
             <Card className={styles.section}>
@@ -145,7 +160,7 @@ const PlaceOrder = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {cartItems.map((item) => (
+                        {orderItems.map((item) => (
                           <TableRow key={item._id}>
                             <TableCell>
                               <NextLink href={`/product/${item.slug}`} passHref>
@@ -232,28 +247,20 @@ const PlaceOrder = () => {
                     </Grid>
                   </Grid>
                 </ListItem>
-                <ListItem>
-                  <Button
-                    onClick={placeOrderHandler}
-                    color="primary"
-                    variant="contained"
-                    fullWidth
-                  >
-                    Place Order
-                  </Button>
-                </ListItem>
-                {loading && (
-                  <ListItem>
-                    <CircularProgress />
-                  </ListItem>
-                )}
               </List>
             </Card>
           </Grid>
         </Grid>
-      </Layout>
-    )
+      )}
+    </Layout>
+    // )
   );
 };
 
-export default PlaceOrder;
+export async function getServerSideProps({ params }) {
+  return {
+    props: { params },
+  };
+}
+
+export default Order;
