@@ -90,6 +90,12 @@ const Layout = ({ title, description, children }) => {
     Cookies.remove('paymentMethod');
     router.push('/');
   };
+
+  const onClickHandler = (e, redirect) => {
+    if (redirect) {
+      router.push(redirect);
+    }
+  };
   return (
     !isSSR && (
       <div>
@@ -139,11 +145,13 @@ const Layout = ({ title, description, children }) => {
                     {open && (
                       <div className={styles.menu_navbar}>
                         <ul>
-                          <li>
-                            <NextLink href="#">Profile</NextLink>
+                          <li onClick={(e) => onClickHandler(e, '/profile')}>
+                            Profile
                           </li>
-                          <li>
-                            <NextLink href="#">My account</NextLink>
+                          <li
+                            onClick={(e) => onClickHandler(e, '/order-history')}
+                          >
+                            Order History
                           </li>
                           <li onClick={logoutHandler}>Logout</li>
                         </ul>
